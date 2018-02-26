@@ -4,6 +4,7 @@ const path = require('path')
 const mkdirp = require('mkdirp')
 
 const AgentCommunication = require('./agent-communication')
+const Settings = require('./settings')
 
 class SaveRunner {
 
@@ -43,7 +44,7 @@ class SaveRunner {
     this.agent.save()
 
     const filePath = path.join(
-      process.env.BACKUP_DIR || __dirname,
+      Settings.BACKUP_DIR,
       slug(this.agent.name.toLowerCase()),
       slug(this.saveOrder.name.toLowerCase()),
       `${new Date().toLocaleString().replace(' ', '_')}.zip`

@@ -11,7 +11,7 @@ class Agent extends BaseEntity {
   @PrimaryGeneratedColumn()
   id = undefined
 
-  @Column('varchar')
+  @Column('varchar', { length: 25 })
   name = undefined
 
   @Column('varchar')
@@ -37,7 +37,7 @@ class Agent extends BaseEntity {
     return agent.save()
   }
 
-  static getById(id){
+  static getById(id) {
     return Agent.findOneById(id)
   }
 }

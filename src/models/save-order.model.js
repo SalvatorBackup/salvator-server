@@ -11,7 +11,7 @@ class SaveOrder extends BaseEntity {
   @PrimaryGeneratedColumn()
   id = undefined
 
-  @Column('varchar')
+  @Column('varchar', { length: 25 })
   name = undefined
 
   @Column('text')
@@ -37,7 +37,7 @@ class SaveOrder extends BaseEntity {
     return saveOrder.save()
   }
 
-  static getById(id){
+  static getById(id) {
     return SaveOrder.findOneById(id)
   }
 }

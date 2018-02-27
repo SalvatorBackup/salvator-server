@@ -9,9 +9,12 @@ const rollbar = new Rollbar({
   captureUnhandledRejections: true
 })
 
-;(async () => {
+;
+(async () => {
   const express = require('express')
   const bodyParser = require('body-parser')
+  const session = require('express-session')
+  const cors = require('cors')
 
   const SaveRunner = require('./salvator')
   const Database = require('./database')
@@ -30,19 +33,31 @@ const rollbar = new Rollbar({
   const app = express()
 
   app
-    .use((req, res, next) => {
-      res.header('Access-Control-Allow-Origin', '*')
-      res.header('Access-Control-Allow-Methods', '*')
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
-      next()
-    })
-    .use((req, res, next) => {
-      if(req.method === 'OPTIONS' || req.headers['authorization'] === Settings.DASHBOARD_PASSWORD)
-        return next()
-
-      res.status(401).send('Bad pass')
-    })
+    .set('trust proxy', 1)
+    .use(session({
+      secret: Settings.SESS_SECRET,
+      saveUninitialized: true,
+      resave: false
+    }))
+    .use(cors({
+      origin: true,
+      credentials: true
+    }))
     .use(bodyParser.json())
+    .post('/api/login', (req, res) => {
+      if (req.body.password === Settings.DASHBOARD_PASSWORD) {
+        req.session.isAuth = true
+        res.status(200).send({})
+      } else {
+        res.status(401).send('Bad pass')
+      }
+    })
+    .use((req, res, next) => {
+      if (req.method === 'OPTIONS' || req.session.isAuth === true)
+        return next()
+      else
+        res.status(401).send('Please auth')
+    })
     .use('/api/agents', agentsRouter)
     .use('/api/save-orders', saveOrdersRouter)
     .use('/api/plannings', planningsRouter)

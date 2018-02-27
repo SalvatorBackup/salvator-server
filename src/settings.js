@@ -10,7 +10,9 @@ class Settings {
     DB_PASSWORD: '',
     DB_NAME: 'salvator',
     BACKUP_DIR: path.join(__dirname, '..', 'backups'),
-    DASHBOARD_PASSWORD: 'SalvatorFTW'
+    DASHBOARD_PASSWORD: 'SalvatorFTW',
+    SESS_SECRET: 'keyboard cat',
+    CORS_ORIGIN: 'http://localhost:4200'
   }
 
   static get(){

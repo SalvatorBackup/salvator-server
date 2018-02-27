@@ -13,7 +13,7 @@ saveOrdersRouter
   })
   .post('/', async (req, res) => {
     const schema = Joi.object().keys({
-      name: Joi.string().required(),
+      name: Joi.string().min(3).max(25).required(),
       includes: Joi.string().required(),
       excludes: Joi.string().allow('').optional(),
       interval: Joi.string().required(),

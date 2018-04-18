@@ -1,10 +1,11 @@
 const slug = require('@slynova/slug')
+const StorageManager = require('@slynova/flydrive')
 const fs = require('fs')
 const path = require('path')
-const mkdirp = require('mkdirp')
 
 const AgentCommunication = require('./agent-communication')
 const Settings = require('./settings')
+const StorageConfigManager = require('./storage-config-manager')
 
 class SaveRunner {
 
@@ -36,24 +37,50 @@ class SaveRunner {
     }).catch(err => console.log('failed to save order...'))
     // TODO : better catch
 
-    if(x.data === undefined)
+    if (x.data === undefined)
       return
+
+    const chunks = []
+    x.data.on('data', chunk => {
+      chunks.push(chunk)
+    })
+    x.data.on('error', err => {
+      throw err
+    })
+
+    // Node fucking flydrive
+    const currentConfig = await StorageConfigManager.get()
+
+    console.log(currentConfig.availableDrivers[currentConfig.activeDriver])
+
+    const storage = new StorageManager({
+      default: currentConfig.activeDriver,
+      disks: {
+        [currentConfig.activeDriver]: {
+          driver: currentConfig.activeDriver,
+          ...currentConfig.availableDrivers[currentConfig.activeDriver].config
+        }
+      }
+    })
+
+    x.data.on('end', () => {
+      const fileName = path.join(
+        slug(this.agent.name.toLowerCase()),
+        slug(this.saveOrder.name.toLowerCase()),
+        `${new Date().toLocaleString().replace(' ', '_').replace(':', '-').replace(':', '-')}.zip`
+      )
+
+      storage.put(fileName, Buffer.concat(chunks).toString('binary'), 'binary')
+        .then(() => console.log(`Successfully backuped "${fileName}"`))
+        .catch(err => {
+          console.log(`Failed to backup "${fileName}"`)
+          throw err
+        })
+    })
 
     // Update last contact
     this.agent.lastContact = Date.now()
     this.agent.save()
-
-    const filePath = path.join(
-      Settings.BACKUP_DIR,
-      slug(this.agent.name.toLowerCase()),
-      slug(this.saveOrder.name.toLowerCase()),
-      `${new Date().toLocaleString().replace(' ', '_')}.zip`
-    )
-
-    mkdirp(path.dirname(filePath), err => {
-      const ws = fs.createWriteStream(filePath)
-      x.data.pipe(ws)
-    })
   }
 
   stop() {

@@ -22,6 +22,7 @@ const rollbar = new Rollbar({
   const saveOrdersRouter = require('./routes/save-orders.routes')
   const planningsRouter = require('./routes/plannings.routes')
   const settingsRouter = require('./routes/settings.routes')
+  const storageRouter = require('./routes/storage.routes')
 
   // DATABASE
   await Database.init()
@@ -62,6 +63,7 @@ const rollbar = new Rollbar({
     .use('/api/save-orders', saveOrdersRouter)
     .use('/api/plannings', planningsRouter)
     .use('/api/settings', settingsRouter)
+    .use('/api/storage', storageRouter)
     .use(express.static('public'));
 
 

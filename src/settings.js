@@ -9,7 +9,6 @@ class Settings {
     DB_USERNAME: 'root',
     DB_PASSWORD: '',
     DB_NAME: 'salvator',
-    BACKUP_DIR: path.join(__dirname, '..', 'backups'),
     DASHBOARD_PASSWORD: 'SalvatorFTW',
     SESS_SECRET: 'keyboard cat'
   }
